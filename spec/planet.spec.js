@@ -57,3 +57,20 @@ describe('Planet.list', () => {
     expect(result).toEqual([mockPlanet1, mockPlanet2]);
   });
 });
+
+describe('Planet.add', () => {
+  it('should add a new planet if it does not already exist', () => {
+    const newPlanet = {
+      name: 'Saturn-Unique', 
+      size_km: 120536,
+      atmosphere: 'Hydrogen, Helium',
+      type: 'Gas Giant',
+      distance_from_sun_km: 1433500000
+    };
+
+    const result = Planet.add(newPlanet);
+    expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+    expect(db.prepare).toHaveBeenCalledWith("INSERT INTO planets (name, size_km, atmosphere, type, distance_from_sun_km) VALUES (?, ?, ?, ?, ?)");
+    expect(result).toBeTrue();
+  });
+});
