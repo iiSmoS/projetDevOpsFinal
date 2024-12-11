@@ -25,7 +25,7 @@ router.post('/submit', (req, res) => {
     });
   
     if (!result) {
-      res.redirect('/planets?errors=Planet already exists in pending or published list');
+      res.redirect('/planets?errors=check that the planet does not already exist and that the fields are valid');
     } else {
       res.redirect('/planets?message=Planet submitted successfully');
     }

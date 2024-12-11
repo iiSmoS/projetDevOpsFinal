@@ -313,7 +313,7 @@ it('should not submit a duplicate planet', () => {
     routeHandler(req, res);
 
     // Verify redirect was called with error message
-    expect(res.redirect).toHaveBeenCalledWith('/planets?errors=Planet already exists in pending or published list');
+    expect(res.redirect).toHaveBeenCalledWith('/planets?errors=check that the planet does not already exist and that the fields are valid');
     expect(PendingPlanet.add).toHaveBeenCalled();
     });
 
