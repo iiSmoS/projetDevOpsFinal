@@ -75,7 +75,7 @@ describe('Planet.add', () => {
   });
 });
 
-describe('Test to add existing planet', () => {
+describe('Planet.add method (rejecting existing planets)', () => {
   it('should not add a planet if it already exists', () => {
     const result = Planet.add(mockPlanet1);
     expect(result).toBeFalse();
@@ -83,7 +83,7 @@ describe('Test to add existing planet', () => {
   });
 });
 
-describe('Validation test to add a planet', () => {
+describe('Planet.add method (validation tests)', () => {
   it('should not add a planet if any of the required fields is missing or invalid', () => {
     const invalidPlanet = {
       name: '', 
