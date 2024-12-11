@@ -1,62 +1,128 @@
-// planetPending.spec.js
 const PendingPlanet = require('../models/PendingPlanet');
 const db = require('../models/db_conf');
 
 describe('PendingPlanet Model', () => {
-    beforeEach(() => {
-        spyOn(db, 'prepare').and.callFake((query) => {
-            if (query.includes('SELECT * FROM pending_planets WHERE name = ?')) {
-                return { 
-                    get: () => null,
-                    run: () => ({ changes: 1 })
-                };
-            }
-            if (query.includes('SELECT * FROM planets WHERE name = ?')) {
-                return { 
-                    get: () => null
-                };
-            }
-            if (query.includes('INSERT INTO pending_planets')) {
-                return {
-                    run: () => ({ changes: 1 })
-                };
-            }
-            return {
-                all: () => [{ id: 1, name: 'Earth' }],
-                get: () => ({ id: 1, name: 'Earth' }),
-                run: () => ({ changes: 1 })
-            };
-        });
-    });
+  let prepareSpy;
 
-    it('should list all pending planets', () => {
-        const planets = PendingPlanet.list();
-        expect(planets).toEqual([{ id: 1, name: 'Earth' }]);
-    });
-
-    it('should find a pending planet by id', () => {
-        const planet = PendingPlanet.findById(1);
-        expect(planet).toEqual({ id: 1, name: 'Earth' });
-    });
-
-    it('should delete a pending planet by id', () => {
-        const result = PendingPlanet.deleteById(1);
-        expect(result).toBe(true);
-    });
-
-    it('should add a new pending planet', () => {
-        const planetData = { 
-            name: 'Mars', 
-            size_km: 6779, 
-            atmosphere: 'CO2', 
-            type: 'Terrestrial', 
-            distance_from_sun_km: 227943824 
+  beforeEach(() => {
+    // Allow respying in Jasmine
+    jasmine.getEnv().allowRespy(true);
+    
+    // Create spy for db.prepare
+    prepareSpy = spyOn(db, 'prepare').and.callFake((query) => {
+      // Handle different query types
+      if (query.includes('SELECT * FROM pending_planets WHERE name = ?')) {
+        return {
+          get: () => null // Default: no duplicates
         };
-    
-        const result = PendingPlanet.add(planetData);
-        expect(result).toBe(true);
-        expect(db.prepare).toHaveBeenCalled();
+      }
+      if (query.includes('SELECT * FROM planets WHERE name = ?')) {
+        return {
+          get: () => null // Default: no existing planets
+        };
+      }
+      if (query.includes('INSERT INTO pending_planets')) {
+        return {
+          run: () => ({ changes: 1 }) // Default: successful insert
+        };
+      }
+      if (query.includes('DELETE FROM pending_planets WHERE id = ?')) {
+        return {
+          run: () => ({ changes: 1 }) // Default: successful delete
+        };
+      }
+      // Default behaviors
+      return {
+        all: () => [{ id: 1, name: 'Earth' }],
+        get: () => ({ id: 1, name: 'Earth' }),
+        run: () => ({ changes: 1 })
+      };
     });
+  });
 
+  afterEach(() => {
+    // Clean up spies
+    if (prepareSpy) {
+      prepareSpy.calls.reset();
+    }
+  });
+
+  // List planets
+  it('should list all pending planets', () => {
+    const planets = PendingPlanet.list();
+    expect(planets).toEqual([{ id: 1, name: 'Earth' }]);
+    expect(prepareSpy).toHaveBeenCalledWith('SELECT * FROM pending_planets');
+  });
+
+  // Find planet by ID
+  it('should find a pending planet by id', () => {
+    const planet = PendingPlanet.findById(1);
+    expect(planet).toEqual({ id: 1, name: 'Earth' });
+    expect(prepareSpy).toHaveBeenCalledWith('SELECT * FROM pending_planets WHERE id = ?');
+  });
+
+  // Delete planet
+  it('should delete a pending planet by id', () => {
+    const result = PendingPlanet.deleteById(1);
+    expect(result).toBe(true);
+    expect(prepareSpy).toHaveBeenCalledWith('DELETE FROM pending_planets WHERE id = ?');
+  });
+
+  // Add new planet
+  it('should add a new pending planet', () => {
+    const planetData = {
+      name: 'Mars',
+      size_km: 6779,
+      atmosphere: 'CO2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 227943824
+    };
+
+    const result = PendingPlanet.add(planetData);
+    expect(result).toBe(true);
+    expect(prepareSpy).toHaveBeenCalled();
+  });
+
+  // planetPending.spec.js
+
+  it('should not add a duplicate pending planet', () => {
+    // Spy on console.error to verify error message
+    spyOn(console, 'error');
+  
+    // Override spy for duplicate check
+    prepareSpy.and.callFake((query) => {
+      if (query.includes('SELECT * FROM pending_planets WHERE name = ?')) {
+        return { 
+          get: () => ({ id: 1, name: 'Mars' }) // Simulate existing planet
+        };
+      }
+      if (query.includes('SELECT * FROM planets WHERE name = ?')) {
+        return {
+          get: () => null
+        };
+      }
+      return {
+        get: () => null,
+        run: () => ({ changes: 0 })
+      };
+    });
+  
+    const planetData = {
+      name: 'Mars',
+      size_km: 6779,
+      atmosphere: 'CO2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 227943824
+    };
+  
+    const result = PendingPlanet.add(planetData);
     
+    // Verify result and error message
+    expect(result).toBe(false);
+    expect(console.error).toHaveBeenCalledWith(
+      'Error adding pending planet:',
+      'Planet with this name already exists in the database'
+    );
+    expect(prepareSpy).toHaveBeenCalledWith('SELECT * FROM pending_planets WHERE name = ?');
+  });
 });
