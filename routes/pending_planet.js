@@ -31,6 +31,11 @@ router.post('/submit', (req, res) => {
     }
   });
 
+  // Catch-all route for 404 errors
+router.use((req, res, next) => {
+    res.status(404).send('Not Found');
+  });
+
 // Route to render pending planets index
 
 module.exports = router;

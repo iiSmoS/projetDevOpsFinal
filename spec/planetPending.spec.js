@@ -315,6 +315,38 @@ it('should not submit a duplicate planet', () => {
     // Verify redirect was called with error message
     expect(res.redirect).toHaveBeenCalledWith('/planets?errors=Planet already exists in pending or published list');
     expect(PendingPlanet.add).toHaveBeenCalled();
+    });
+
+    // planetPending.spec.js - Add to existing route tests
+it('should return 404 for unknown routes', () => {
+    // Get catch-all route handler
+    const notFoundHandler = pending_planet_router.stack
+        .find(layer => !layer.route)
+        .handle;
+
+    // Create mock request and response
+    const req = {
+        method: 'GET',
+        url: '/nonexistent'
+    };
+
+    // Create mock response with spies
+    const send = jasmine.createSpy('send');
+    const res = {
+        status: jasmine.createSpy('status').and.returnValue({
+            send: send
+        })
+    };
+
+    const next = jasmine.createSpy('next');
+
+    // Call handler directly
+    notFoundHandler(req, res, next);
+
+    // Verify response
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(send).toHaveBeenCalledWith('Not Found');
+    expect(next).not.toHaveBeenCalled();
 });
 
 });
