@@ -162,6 +162,10 @@ it('should find a pending planet by name', () => {
     expect(prepareSpy).toHaveBeenCalledWith('SELECT * FROM pending_planets WHERE name = ?');
   });
   
+  it('should remove a pending planet by name', () => {
+    const result = PendingPlanet.remove('Earth');
+    expect(result).toBe(true);
+});
 
   
 
