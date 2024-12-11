@@ -16,11 +16,23 @@ class PendingPlanet {
   }
   // PendingPlanet.js
   static add(planetData) {
+    if (
+      !planetData.name ||
+      !planetData.size_km ||
+      !planetData.distance_from_sun_km
+    ) {
+      return false;
+    }
+
     const stmt = db.prepare(`
-        INSERT INTO pending_planets (name) 
-        VALUES (?)
+        INSERT INTO pending_planets (name, size_km, distance_from_sun_km) 
+        VALUES (?, ?, ?)
     `);
-    const result = stmt.run(planetData.name);
+    const result = stmt.run(
+      planetData.name,
+      planetData.size_km,
+      planetData.distance_from_sun_km
+    );
     return result.changes > 0;
   }
 }
