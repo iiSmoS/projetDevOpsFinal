@@ -483,3 +483,106 @@ it('should handle invalid URLs', () => {
 
 
 });
+// Tests for PendingPlanet add method
+
+describe('PendingPlanet Distance Validation', () => {
+  it('should reject a planet with a distance that is too small', () => {
+    const smallDistancePlanet = {
+      name: 'TinyStar',
+      size_km: 1000,
+      atmosphere: 'None',
+      type: 'Dwarf',
+      distance_from_sun_km: 999
+    };
+    const result = PendingPlanet.add(smallDistancePlanet);
+    expect(result).toBeFalse();
+  });
+
+  it('should reject a planet with a distance of zero', () => {
+    const zeroDistancePlanet = {
+      name: 'ZeroStar',
+      size_km: 5000,
+      atmosphere: 'None',
+      type: 'Giant',
+      distance_from_sun_km: 0
+    };
+    const result = PendingPlanet.add(zeroDistancePlanet);
+    expect(result).toBeFalse();
+  });
+
+  it('should reject a planet with a negative distance', () => {
+    const negativeDistancePlanet = {
+      name: 'NegativeStar',
+      size_km: 8000,
+      atmosphere: 'CO2',
+      type: 'Giant',
+      distance_from_sun_km: -100000
+    };
+    const result = PendingPlanet.add(negativeDistancePlanet);
+    expect(result).toBeFalse();
+  });
+
+  it('should reject a planet with an unrealistically large distance', () => {
+    const hugeDistancePlanet = {
+      name: 'FarAway',
+      size_km: 100000,
+      atmosphere: 'Hydrogen',
+      type: 'Gas Giant',
+      distance_from_sun_km: 1e15
+    };
+    const result = PendingPlanet.add(hugeDistancePlanet);
+    expect(result).toBeFalse();
+  });
+
+  it('should accept a planet with a realistic distance', () => {
+    const realisticDistancePlanet = {
+      name: 'TerraNova',
+      size_km: 12742,
+      atmosphere: 'N2/O2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 149600000
+    };
+    const result = PendingPlanet.add(realisticDistancePlanet);
+    expect(result).toBeTrue();
+  });
+});
+
+describe('PendingPlanet Case-Insensitive Name Validation', () => {
+  it('should reject a planet with a duplicate name regardless of case', () => {
+    spyOn(db, 'prepare').and.callFake((query) => {
+      if (query.includes('LOWER(name)')) {
+        return { get: () => ({ id: 1, name: 'EARTH' }) }; // Mocked duplicate name
+      }
+      return { get: () => null, run: () => ({ changes: 1 }) };
+    });
+
+    const duplicatePlanet = {
+      name: 'earth',
+      size_km: 12742,
+      atmosphere: 'N2/O2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 149598262
+    };
+    const result = PendingPlanet.add(duplicatePlanet);
+    expect(result).toBeFalse();
+  });
+
+  it('should accept a planet with a unique name ignoring case sensitivity', () => {
+    spyOn(db, 'prepare').and.callFake((query) => {
+      if (query.includes('LOWER(name)')) {
+        return { get: () => null }; // No duplicate found
+      }
+      return { get: () => null, run: () => ({ changes: 1 }) };
+    });
+
+    const uniquePlanet = {
+      name: 'UniquePlanet',
+      size_km: 12742,
+      atmosphere: 'N2/O2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 149598262
+    };
+    const result = PendingPlanet.add(uniquePlanet);
+    expect(result).toBeTrue();
+  });
+});

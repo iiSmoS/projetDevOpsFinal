@@ -29,13 +29,13 @@ class PendingPlanet {
       }
 
       // Validate planetData.distance_from_sun_km
-      if (typeof planetData.distance_from_sun_km !== 'number' || planetData.distance_from_sun_km < 0) {
-        throw new Error('Planet distance from sun must be a non-negative number');
+      if (typeof planetData.distance_from_sun_km !== 'number' || planetData.distance_from_sun_km <= 0 || planetData.distance_from_sun_km < 100000 || planetData.distance_from_sun_km > 1e12) {
+        throw new Error('Planet distance from sun must be realistic (between 100,000 km and 1,000,000,000,000 km)');
       }
 
-      // Check if planet already exists in pending or published tables
-      const existingPending = db.prepare('SELECT * FROM pending_planets WHERE name = ?').get(planetData.name);
-      const existingPublished = db.prepare('SELECT * FROM planets WHERE name = ?').get(planetData.name);
+      // Check if planet already exists in pending or published tables (case insensitive)
+      const existingPending = db.prepare('SELECT * FROM pending_planets WHERE LOWER(name) = LOWER(?)').get(planetData.name);
+      const existingPublished = db.prepare('SELECT * FROM planets WHERE LOWER(name) = LOWER(?)').get(planetData.name);
 
       if (existingPending || existingPublished) {
         throw new Error('Planet with this name already exists in the database');
@@ -61,6 +61,7 @@ class PendingPlanet {
       return false;
     }
   }
+
 
   // Add this method to PendingPlanet.js
     static findByName(name) {
