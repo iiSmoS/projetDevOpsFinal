@@ -32,3 +32,7 @@ module.exports.add = (data) => {
     stmt.run(data.name, data.size_km, data.atmosphere, data.type, data.distance_from_sun_km);
     return true;
   };
+
+  module.exports.findByName = (name) => {
+    return db.prepare("SELECT * FROM planets WHERE name = ?").get(name);
+  };

@@ -75,10 +75,40 @@ describe('Planet.add', () => {
   });
 });
 
-describe('Test to add existing planet', () => {
+describe('Planet.add method (rejecting existing planets)', () => {
   it('should not add a planet if it already exists', () => {
     const result = Planet.add(mockPlanet1);
     expect(result).toBeFalse();
     expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+  });
+});
+
+describe('Planet.add method (validation tests)', () => {
+  it('should not add a planet if any of the required fields is missing or invalid', () => {
+    const invalidPlanet = {
+      name: '', 
+      size_km: 12104,
+      atmosphere: 'Carbon Dioxide, Nitrogen',
+      type: 'Terrestrial',
+      distance_from_sun_km: 108200000
+    };
+
+    const result = Planet.add(invalidPlanet);
+    expect(result).toBeFalse();
+    expect(db.prepare).not.toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+  });
+});
+
+describe('Planet.findByName', () => {
+  it('should return a planet by its name', () => {
+    const result = Planet.findByName('Earth');
+    expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+    expect(result).toEqual({
+      name: 'Earth',
+      size_km: 12742,
+      atmosphere: 'Nitrogen, Oxygen',
+      type: 'Terrestrial',
+      distance_from_sun_km: 149600000
+    });
   });
 });
