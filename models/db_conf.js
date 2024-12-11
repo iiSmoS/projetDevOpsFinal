@@ -4,3 +4,4 @@ const db = require('better-sqlite3')('db/exoplanets (2) (2).db', { verbose: cons
 // const db = require('better-sqlite3')('/home/olivier/exoplanets.db', { verbose: console.log });
 
 module.exports = db;
+
