@@ -125,4 +125,82 @@ describe('PendingPlanet Model', () => {
     );
     expect(prepareSpy).toHaveBeenCalledWith('SELECT * FROM pending_planets WHERE name = ?');
   });
+
+  // Add test for finding planet by name
+it('should find a pending planet by name', () => {
+    // Setup spy behavior for name lookup
+    prepareSpy.and.callFake((query) => {
+      if (query.includes('SELECT * FROM pending_planets WHERE name = ?')) {
+        return {
+          get: () => ({
+            id: 2,
+            name: 'Mars',
+            size_km: 6779,
+            atmosphere: 'CO2',
+            type: 'Terrestrial',
+            distance_from_sun_km: 227943824
+          })
+        };
+      }
+      return {
+        get: () => null
+      };
+    });
+  
+    // Execute test
+    const planet = PendingPlanet.findByName('Mars');
+  
+    // Verify results
+    expect(planet).toEqual({
+      id: 2,
+      name: 'Mars',
+      size_km: 6779,
+      atmosphere: 'CO2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 227943824
+    });
+    expect(prepareSpy).toHaveBeenCalledWith('SELECT * FROM pending_planets WHERE name = ?');
+  });
+
+  it('should remove a pending planet by name', () => {
+    const result = PendingPlanet.remove('Earth');
+    expect(result).toBe(true);
 });
+
+it('should handle failed database operations', () => {
+    // Spy on console.error
+    spyOn(console, 'error');
+  
+    // Override spy to simulate database failure
+    prepareSpy.and.callFake((query) => {
+      if (query.includes('INSERT INTO pending_planets')) {
+        return {
+          run: () => { throw new Error('Database error: connection lost') }
+        };
+      }
+      return {
+        get: () => null,
+        run: () => ({ changes: 0 })
+      };
+    });
+  
+    const planetData = {
+      name: 'Mars',
+      size_km: 6779,
+      atmosphere: 'CO2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 227943824
+    };
+  
+    const result = PendingPlanet.add(planetData);
+    
+    expect(result).toBe(false);
+    expect(console.error).toHaveBeenCalledWith(
+      'Error adding pending planet:',
+      'Database error: connection lost'
+    );
+  });
+  
+
+});
+

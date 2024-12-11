@@ -61,6 +61,17 @@ class PendingPlanet {
       return false;
     }
   }
+
+  // Add this method to PendingPlanet.js
+    static findByName(name) {
+    return db.prepare("SELECT * FROM pending_planets WHERE name = ?").get(name);
+  }
+  // Add to PendingPlanet.js
+static remove(name) {
+    const stmt = db.prepare("DELETE FROM pending_planets WHERE name = ?");
+    const result = stmt.run(name);
+    return result.changes > 0;
+  }
 }
 
 module.exports = PendingPlanet;
