@@ -112,3 +112,11 @@ describe('Planet.findByName', () => {
     });
   });
 });
+
+describe('Planet.findByName method (planet not found)', () => {
+  it('should return null if the planet is not found in the database', () => {
+    const result = Planet.findByName('Pluto');
+    expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+    expect(result).toBeNull();
+  });
+});
