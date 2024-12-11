@@ -74,3 +74,11 @@ describe('Planet.add', () => {
     expect(result).toBeTrue();
   });
 });
+
+describe('Test to add existing planet', () => {
+  it('should not add a planet if it already exists', () => {
+    const result = Planet.add(mockPlanet1);
+    expect(result).toBeFalse();
+    expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+  });
+});
