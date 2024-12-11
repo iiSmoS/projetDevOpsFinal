@@ -283,4 +283,38 @@ describe('Planet Pending Routes', () => {
         expect(res.redirect).toHaveBeenCalledWith('/planets?message=Planet submitted successfully');
         expect(PendingPlanet.add).toHaveBeenCalled();
     });
+    
+   // planetPending.spec.js
+it('should not submit a duplicate planet', () => {
+    // Mock PendingPlanet.add to simulate duplicate planet error
+    spyOn(PendingPlanet, 'add').and.returnValue(false);
+
+    // Get route handler function directly
+    const routeHandler = pending_planet_router.stack
+        .find(layer => layer.route && layer.route.path === '/submit')
+        .route.stack[0].handle;
+
+    // Create mock request and response
+    const req = {
+        body: {
+            name: 'Earth',
+            size_km: '12742',
+            atmosphere: 'N2/O2',
+            type: 'Terrestrial',
+            distance_from_sun_km: '149598262'
+        }
+    };
+    
+    const res = {
+        redirect: jasmine.createSpy('redirect')
+    };
+
+    // Call handler directly
+    routeHandler(req, res);
+
+    // Verify redirect was called with error message
+    expect(res.redirect).toHaveBeenCalledWith('/planets?errors=Planet already exists in pending or published list');
+    expect(PendingPlanet.add).toHaveBeenCalled();
+});
+
 });
