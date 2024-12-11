@@ -161,12 +161,45 @@ it('should find a pending planet by name', () => {
     });
     expect(prepareSpy).toHaveBeenCalledWith('SELECT * FROM pending_planets WHERE name = ?');
   });
-  
+
   it('should remove a pending planet by name', () => {
     const result = PendingPlanet.remove('Earth');
     expect(result).toBe(true);
 });
 
+it('should handle failed database operations', () => {
+    // Spy on console.error
+    spyOn(console, 'error');
+  
+    // Override spy to simulate database failure
+    prepareSpy.and.callFake((query) => {
+      if (query.includes('INSERT INTO pending_planets')) {
+        return {
+          run: () => { throw new Error('Database error: connection lost') }
+        };
+      }
+      return {
+        get: () => null,
+        run: () => ({ changes: 0 })
+      };
+    });
+  
+    const planetData = {
+      name: 'Mars',
+      size_km: 6779,
+      atmosphere: 'CO2',
+      type: 'Terrestrial',
+      distance_from_sun_km: 227943824
+    };
+  
+    const result = PendingPlanet.add(planetData);
+    
+    expect(result).toBe(false);
+    expect(console.error).toHaveBeenCalledWith(
+      'Error adding pending planet:',
+      'Database error: connection lost'
+    );
+  });
   
 
 });
