@@ -414,4 +414,42 @@ it('should handle errors', () => {
         jasmine.stringMatching('Error: Test Error')
     );
 });
+// planetPending.spec.js
+it('should handle database errors', () => {
+    // Setup spy for PendingPlanet.add
+    spyOn(PendingPlanet, 'add').and.callFake(() => {
+        throw new Error('Database error');
+    });
+    
+    // Get submit route handler
+    const routeHandler = pending_planet_router.stack
+        .find(layer => layer.route && layer.route.path === '/submit')
+        .route.stack[0].handle;
+
+    // Create mock request
+    const req = {
+        body: { 
+            name: 'Mars', 
+            size_km: '6779', 
+            atmosphere: 'CO2', 
+            type: 'Terrestrial', 
+            distance_from_sun_km: '227943824' 
+        }
+    };
+
+    // Create mock response
+    const res = {
+        redirect: jasmine.createSpy('redirect')
+    };
+
+    // Execute handler
+    try {
+        routeHandler(req, res);
+        // Should redirect with error message
+        expect(res.redirect).toHaveBeenCalledWith('/planets?errors=Error adding planet');
+    } catch (error) {
+        // Verify error was thrown with correct message
+        expect(error.message).toBe('Database error');
+    }
+});
 });
