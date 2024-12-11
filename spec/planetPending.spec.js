@@ -207,11 +207,7 @@ it('should handle failed database operations', () => {
 });
 
 
-// routes test 
 // Routes tests
-// planetPending.spec.js
-
-
 describe('Planet Pending Routes', () => {
     let planetListSpy;
 
@@ -226,7 +222,7 @@ describe('Planet Pending Routes', () => {
             planetListSpy.calls.reset();
         }
     });
-    
+
 
     it('should render planets index', () => {
         // Get route handler function directly from the router
