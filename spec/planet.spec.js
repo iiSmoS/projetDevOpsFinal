@@ -82,3 +82,19 @@ describe('Test to add existing planet', () => {
     expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
   });
 });
+
+describe('Validation test to add a planet', () => {
+  it('should not add a planet if any of the required fields is missing or invalid', () => {
+    const invalidPlanet = {
+      name: '', 
+      size_km: 12104,
+      atmosphere: 'Carbon Dioxide, Nitrogen',
+      type: 'Terrestrial',
+      distance_from_sun_km: 108200000
+    };
+
+    const result = Planet.add(invalidPlanet);
+    expect(result).toBeFalse();
+    expect(db.prepare).not.toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+  });
+});
