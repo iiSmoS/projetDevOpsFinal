@@ -45,4 +45,11 @@ describe("PendingPlanet", () => {
       planetData.distance_from_sun_km
     );
   });
+  it("should reject incomplete planet data", () => {
+    const incompleteData = { name: "Mars" };
+    const result = PendingPlanet.add(incompleteData);
+    expect(result).toBe(false);
+    // No run call should be made for incomplete data
+    expect(db.prepare().run).not.toHaveBeenCalled();
+  });
 });
