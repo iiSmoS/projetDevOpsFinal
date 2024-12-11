@@ -251,4 +251,36 @@ describe('Planet Pending Routes', () => {
         });
         expect(planetListSpy).toHaveBeenCalled();
     });
+
+    it('should submit a new planet', () => {
+        // Mock PendingPlanet.add
+        spyOn(PendingPlanet, 'add').and.returnValue(true);
+
+        // Get route handler function directly
+        const routeHandler = pending_planet_router.stack
+            .find(layer => layer.route && layer.route.path === '/submit')
+            .route.stack[0].handle;
+
+        // Create mock request and response
+        const req = {
+            body: {
+                name: 'Mars',
+                size_km: '6779',
+                atmosphere: 'CO2',
+                type: 'Terrestrial',
+                distance_from_sun_km: '227943824'
+            }
+        };
+        
+        const res = {
+            redirect: jasmine.createSpy('redirect')
+        };
+
+        // Call handler directly
+        routeHandler(req, res);
+
+        // Verify redirect was called with success message
+        expect(res.redirect).toHaveBeenCalledWith('/planets?message=Planet submitted successfully');
+        expect(PendingPlanet.add).toHaveBeenCalled();
+    });
 });
