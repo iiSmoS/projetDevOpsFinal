@@ -348,5 +348,34 @@ it('should return 404 for unknown routes', () => {
     expect(send).toHaveBeenCalledWith('Not Found');
     expect(next).not.toHaveBeenCalled();
 });
+it('should return 400 if required fields are missing', () => {
+    // Get submit route handler
+    const routeHandler = pending_planet_router.stack
+        .find(layer => layer.route && layer.route.path === '/submit')
+        .route.stack[0].handle;
+
+    // Create mock request with missing required fields
+    const req = {
+        body: { 
+            name: 'Mars' 
+            // Missing size_km, atmosphere, type, distance_from_sun_km
+        }
+    };
+
+    // Create mock response with chained spies
+    const sendSpy = jasmine.createSpy('send');
+    const res = {
+        status: jasmine.createSpy('status').and.returnValue({
+            send: sendSpy
+        })
+    };
+
+    // Execute handler
+    routeHandler(req, res);
+
+    // Verify response
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(sendSpy).toHaveBeenCalledWith('All fields are required');
+});
 
 });

@@ -36,6 +36,12 @@ router.use((req, res, next) => {
     res.status(404).send('Not Found');
   });
 
-// Route to render pending planets index
+  // Error handling middleware
+router.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+  });
+  
+
 
 module.exports = router;
