@@ -98,3 +98,17 @@ describe('Validation test to add a planet', () => {
     expect(db.prepare).not.toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
   });
 });
+
+describe('Planet.findByName', () => {
+  it('should return a planet by its name', () => {
+    const result = Planet.findByName('Earth');
+    expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
+    expect(result).toEqual({
+      name: 'Earth',
+      size_km: 12742,
+      atmosphere: 'Nitrogen, Oxygen',
+      type: 'Terrestrial',
+      distance_from_sun_km: 149600000
+    });
+  });
+});
