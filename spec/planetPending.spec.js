@@ -34,4 +34,12 @@ describe('PendingPlanet', () => {
         expect(result).toBe(true);
         expect(db.prepare().run).toHaveBeenCalledWith(1);
     });
+
+    // PendingPlanet.test.js
+    it('should add a basic pending planet', () => {
+    const result = PendingPlanet.add({ name: 'Mars' });
+    expect(result).toBe(true);
+    expect(db.prepare().run).toHaveBeenCalledWith('Mars');
+    });
+    
 });
