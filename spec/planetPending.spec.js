@@ -1,4 +1,6 @@
 const PendingPlanet = require('../models/PendingPlanet');
+const Planet = require('../models/Planet');
+const pending_planet_router = require('../routes/pending_planet');
 const db = require('../models/db_conf');
 
 describe('PendingPlanet Model', () => {
@@ -204,3 +206,53 @@ it('should handle failed database operations', () => {
 
 });
 
+
+// routes test 
+// Routes tests
+// planetPending.spec.js
+
+
+describe('Planet Pending Routes', () => {
+    let planetListSpy;
+
+    beforeEach(() => {
+        planetListSpy = spyOn(Planet, 'list').and.returnValue([
+            { id: 1, name: 'Earth' }
+        ]);
+    });
+
+    afterEach(() => {
+        if (planetListSpy) {
+            planetListSpy.calls.reset();
+        }
+    });
+    
+
+    it('should render planets index', () => {
+        // Get route handler function directly from the router
+        const routeHandler = pending_planet_router.stack
+            .find(layer => layer.route && layer.route.path === '/planets')
+            .route.stack[0].handle;
+
+        // Create mock request and response objects
+        const req = { 
+            query: {},
+            method: 'GET'
+        };
+        
+        const res = {
+            render: jasmine.createSpy('render')
+        };
+
+        // Call handler directly
+        routeHandler(req, res);
+
+        // Verify render was called with correct parameters
+        expect(res.render).toHaveBeenCalledWith('planets/index', {
+            planets: [{ id: 1, name: 'Earth' }],
+            errors: undefined,
+            message: undefined
+        });
+        expect(planetListSpy).toHaveBeenCalled();
+    });
+});
