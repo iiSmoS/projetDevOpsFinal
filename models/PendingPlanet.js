@@ -61,6 +61,11 @@ class PendingPlanet {
       return false;
     }
   }
+
+  // Add this method to PendingPlanet.js
+    static findByName(name) {
+    return db.prepare("SELECT * FROM pending_planets WHERE name = ?").get(name);
+  }
 }
 
 module.exports = PendingPlanet;
