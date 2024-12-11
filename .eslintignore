@@ -1,0 +1,4 @@
+node_modules/
+tests/
+spec/
+models/db_conf.js
