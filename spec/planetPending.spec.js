@@ -452,4 +452,34 @@ it('should handle database errors', () => {
         expect(error.message).toBe('Database error');
     }
 });
+
+it('should handle invalid URLs', () => {
+    // Get the 404 handler (catch-all middleware)
+    const notFoundHandler = pending_planet_router.stack
+        .find(layer => !layer.route)
+        .handle;
+
+    // Create mock request
+    const req = {
+        method: 'GET',
+        url: '/invalid/url'
+    };
+
+    // Create mock response with chained spies
+    const sendSpy = jasmine.createSpy('send');
+    const res = {
+        status: jasmine.createSpy('status').and.returnValue({
+            send: sendSpy
+        })
+    };
+
+    // Execute handler
+    notFoundHandler(req, res);
+
+    // Verify response
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(sendSpy).toHaveBeenCalledWith('Not Found');
+});
+
+
 });
