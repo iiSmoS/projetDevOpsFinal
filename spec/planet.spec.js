@@ -59,6 +59,7 @@ describe('Planet.list', () => {
 });
 
 describe('Planet.add', () => {
+  
   it('should add a new planet if it does not already exist', () => {
     const newPlanet = {
       name: 'Saturn-Unique', 
@@ -73,17 +74,13 @@ describe('Planet.add', () => {
     expect(db.prepare).toHaveBeenCalledWith("INSERT INTO planets (name, size_km, atmosphere, type, distance_from_sun_km) VALUES (?, ?, ?, ?, ?)");
     expect(result).toBeTrue();
   });
-});
 
-describe('Planet.add method (rejecting existing planets)', () => {
   it('should not add a planet if it already exists', () => {
     const result = Planet.add(mockPlanet1);
     expect(result).toBeFalse();
     expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
   });
-});
 
-describe('Planet.add method (validation tests)', () => {
   it('should not add a planet if any of the required fields is missing or invalid', () => {
     const invalidPlanet = {
       name: '', 
@@ -111,9 +108,7 @@ describe('Planet.findByName', () => {
       distance_from_sun_km: 149600000
     });
   });
-});
 
-describe('Planet.findByName method (planet not found)', () => {
   it('should return null if the planet is not found in the database', () => {
     const result = Planet.findByName('Pluto');
     expect(db.prepare).toHaveBeenCalledWith("SELECT * FROM planets WHERE name = ?");
