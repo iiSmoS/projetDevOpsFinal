@@ -12,7 +12,8 @@ describe('PendingPlanet', () => {
             ]),
             get: jasmine.createSpy('get').and.returnValue(
                 { id: 1, name: 'Planet1' }
-            )
+            ),
+            run: jasmine.createSpy('run').and.returnValue({ changes: 1 })
         });
     });
 
@@ -26,5 +27,11 @@ describe('PendingPlanet', () => {
     it('should return a pending planet by id', () => {
         const planet = PendingPlanet.findById(1);
         expect(planet).toEqual({ id: 1, name: 'Planet1' });
+    });
+
+    it('should delete a pending planet by id', () => {
+        const result = PendingPlanet.deleteById(1);
+        expect(result).toBe(true);
+        expect(db.prepare().run).toHaveBeenCalledWith(1);
     });
 });

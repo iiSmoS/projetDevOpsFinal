@@ -10,5 +10,12 @@ class PendingPlanet {
         return db.prepare("SELECT * FROM pending_planets WHERE id = ?").get(id);
       }
 
+    static deleteById(id) {
+        const stmt = db.prepare("DELETE FROM pending_planets WHERE id = ?");
+        const result = stmt.run(id);
+        return result.changes > 0;
+      }
+    
+
 }
 module.exports = PendingPlanet;
