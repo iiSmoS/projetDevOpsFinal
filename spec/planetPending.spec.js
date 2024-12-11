@@ -378,4 +378,40 @@ it('should return 400 if required fields are missing', () => {
     expect(sendSpy).toHaveBeenCalledWith('All fields are required');
 });
 
+it('should handle errors', () => {
+    // Mock console.error
+    spyOn(console, 'error');
+
+    // Get error handler middleware
+    const errorHandler = pending_planet_router.stack
+        .find(layer => layer.route === undefined && layer.handle.length === 4)
+        .handle;
+
+    // Create mock request and response
+    const req = {
+        method: 'GET',
+        url: '/planets'
+    };
+
+    const sendSpy = jasmine.createSpy('send');
+    const res = {
+        status: jasmine.createSpy('status').and.returnValue({
+            send: sendSpy
+        })
+    };
+
+    // Create mock error
+    const err = new Error('Test Error');
+    const next = jasmine.createSpy('next');
+
+    // Execute error handler
+    errorHandler(err, req, res, next);
+
+    // Verify response using string matching for error message
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(sendSpy).toHaveBeenCalledWith('Something broke!');
+    expect(console.error).toHaveBeenCalledWith(
+        jasmine.stringMatching('Error: Test Error')
+    );
+});
 });
